@@ -1,0 +1,20 @@
+STRIPE82-0113
+
+R
+GAIN    =   2.471381500596E+02 / Maximum equivalent gain (e-/ADU)
+SATURATE=   1.606154432455E+03 / Saturation Level (ADU)
+HIERARCH OAJ PRO FWHMSEXT = 1.552 / FWHM arcsec estimated with SE
+MAG_ZEROPOINT    22.848
+
+G
+GAIN    =   2.037601157961E+02 / Maximum equivalent gain (e-/ADU)
+SATURATE=   1.947413010942E+03 / Saturation Level (ADU)
+HIERARCH OAJ PRO FWHMSEXT = 1.5 / FWHM arcsec estimated with SE
+MAG_ZEROPOINT    22.965
+
+I
+GAIN    =   2.841382964472E+02 / Maximum equivalent gain (e-/ADU)               
+SATURATE=   1.395770421799E+03 / Saturation Level (ADU)
+HIERARCH OAJ PRO FWHMSEXT = 1.394 / FWHM arcsec estimated with SE
+MAG_ZEROPOINT    22.612
+
