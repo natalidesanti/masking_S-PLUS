@@ -1,0 +1,1 @@
+SELECT * FROM dr2_vacs.zero_points
