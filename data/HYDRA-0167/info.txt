@@ -1,0 +1,20 @@
+HYDRA-0167
+
+R
+GAIN    =   1.150301245670E+02 / Maximum equivalent gain (e-/ADU)               
+SATURATE=   1.604535531377E+03 / Saturation Level (ADU)   
+HIERARCH OAJ PRO FWHMSEXT = 1.237 / FWHM arcsec estimated with SE
+MAG_ZEROPOINT    23.497
+
+G
+GAIN    =   9.493275585756E+01 / Maximum equivalent gain (e-/ADU)               
+SATURATE=   1.945639678705E+03 / Saturation Level (ADU)   
+HIERARCH OAJ PRO FWHMSEXT = 1.208 / FWHM arcsec estimated with SE
+MAG_ZEROPOINT    23.477
+
+I
+GAIN    =   1.323880783519E+02 / Maximum equivalent gain (e-/ADU)               
+SATURATE=   1.393426927132E+03 / Saturation Level (ADU)  
+HIERARCH OAJ PRO FWHMSEXT = 1.2 / FWHM arcsec estimated with SE
+MAG_ZEROPOINT    23.255
+
