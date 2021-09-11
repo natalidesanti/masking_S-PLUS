@@ -1,0 +1,435 @@
+\documentclass{article}
+
+\usepackage{arxiv}
+
+\usepackage[utf8]{inputenc} % allow utf-8 input
+\usepackage[T1]{fontenc}    % use 8-bit T1 fonts
+\usepackage{hyperref}       % hyperlinks
+\usepackage{url}            % simple URL typesetting
+\usepackage{booktabs}       % professional-quality tables
+\usepackage{amsfonts}       % blackboard math symbols
+\usepackage{nicefrac}       % compact symbols for 1/2, etc.
+\usepackage{microtype}      % microtypography
+\usepackage{lipsum}		% Can be removed after putting your text content
+\usepackage{graphicx}
+\usepackage{doi}
+\usepackage{multicol}
+\usepackage{multirow}
+\usepackage[ttscale=.85]{libertine}
+\usepackage[table]{xcolor}
+
+\title{\bf Masking S-PLUS}
+
+\date{\today}	% Here you can change the date presented in the paper title
+
+\author{ \href{ https://orcid.org/0000-0002-4728-6881}{\includegraphics[scale=0.005]{figures/ORCID_iD.png}\hspace{1mm}Natalí Soler Matubaro de Santi}\thanks{You can find more about my work in my personal page \href{https://natalidesanti.github.io/}{\texttt{https://natalidesanti.github.io/}}.} \\
+	Department of Mathematical Physics\\
+        Institute of Physics\\
+	University of Sao Paulo\\
+	\texttt{natali.santi@usp.br} \\
+}
+
+% Title for each page
+\renewcommand{\shorttitle}{Masking S-PLUS}
+
+%%% Add PDF metadata to help others organize their library
+%%% Once the PDF is generated, you can check the metadata with
+%%% $ pdfinfo template.pdf
+\hypersetup{
+pdftitle={Masking S-PLUS},
+pdfsubject={Term Project},
+pdfauthor={de Santi, N. S. M.},
+pdfkeywords={survey mask, computer vision, image segmentation, k-means},
+}
+
+\begin{document}
+\maketitle
+
+\begin{abstract}
+  The new generation of surveys has been and will be able to reach much deeper into the Universe, with better image quality, photometric accuracy, as well as much larger numbers of detected objects and that is the case of the Southern Photometric Local Universe Survey (S-PLUS). One key ingredient to use its data for many purposes (since Astronomy to Astrophysics and Cosmology) is to pre-process that data. In this way, masking some observed artifacts is a main task, to guarantee that the objects could be truthfully measured, without the interference of any bright and/or saturated star. Therefore, the objective of this term project is to provide a mask for bright stars (at least for some fields) to S-PLUS.
+\end{abstract}
+
+
+% keywords can be removed
+\keywords{survey mask, computer vision, image segmentation, k-means}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Introduction}
+
+The large scale structure of the universe could be measured studying the galaxy distribution in the recent observations \cite{DES2005, LSST2008, Euclid2012, PFS2012, DESI2016, SPLUS2019}. To do this we need multi-wavelength imaging data to measure the galaxy photometric redshifts, requiring high-precision data pre-processing, whose development and validation are driven by the increasing statistical power of the surveys and the increasing relative importance of the various systematic effects \cite{Coupon2017}.
+
+One of the systematic effects accounts for the bright stars, that saturate the CCD images, messing up measurements of nearby objects and losing the information beyond the saturation limit. The first approach to circumvent this problem usually is the use of external star catalogs to build photometric masks around the saturated stars. However, the loss in area using this method ranges between 10\% and 20\% \cite{Coupon2009, Heymans2012}. Another important thing to mention is that those masks need to cover those stars without masking any extended source of interest \cite{Coupon2017}.
+
+Considering all those challenges, in this work I provide a code that is able to mask almost only the saturated stars (not completely only them because I consider extremely nearby objects of the parts of those stars), that covers less than 5\% of the observed area. In this way, this work is organized as follow: first I show a little about the structure of the bright stars in the section \ref{sec:more}; in the section \ref{sec:Methodology} I explain what was done, showing some results; the analysis of the results and discussions are presented in the section \ref{sec:res_and_disc}; and I close the manuscript with the conclusions, in the section \ref{sec:conclusions}.
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Going deeper into the bright stars}
+\label{sec:more}
+
+\begin{figure}[h!]
+  \centering
+  \includegraphics[scale=0.15]{figures/structure.png}
+  \includegraphics[scale=0.47]{figures/STRIPE82-0113-saturated_star.png}
+  \caption{Example of saturated stars: on the left, $G_{Gaia} = 3.9$ in the HSC-SSP survey (from Coupon, J. et al 2017 \cite{Coupon2017}) and, on the right, one saturated star from the field STRIPE82, from S-PLUS. In the figures you can see the point-spread function, extended luminous halos and ghosts, the vertical linear ``bleed trails'' and the spikes.}
+  \label{fig:examples}
+\end{figure}
+
+The bright stars causes many optical (diffraction pattern, optical reflections and ghosts) and electronic effects (electrons leaking to nearby pixels, brighter-fatter effects and so on). Those effects affect directly the image generating point-spread function-shaped luminous patterns, extended luminous halos and ghosts, the vertical linear ``bleed trails'' and spikes. Almost all those effects could be seen in the Figure \ref{fig:examples}. Both images are $GRI$ composite images, but the $G_{Gaia} = 3.9$ image is processed in the way that the effects are more evident. There is a higher number of objects nearby those stars, that are behind or extremely nearby the effects. Then, the idea of the mask is to remove those stars, to saving the largest possible area of the total image.
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Methodology and Partial Results}
+\label{sec:Methodology}
+
+All the present work was done for two specific S-PLUS tiles \texttt{STRIPE82-0113} and \texttt{HYDRA-0167}. I have used \texttt{fits} images from the bands $R$, $G$ and $I$. All of them are images with $11000 \times 11000$ pixels.
+
+\begin{figure}[h!]
+  \centering
+  \includegraphics[scale=0.5]{../results/STRIPE82-0113/comparison-original_mask-objects_positions.png}
+  \includegraphics[scale=0.5]{../results/HYDRA-0167/comparison-original_mask-objects_positions.png}
+  \caption{Original field $RGB$ image (left) and the original masked positions evidenced (right). The first row is for \texttt{STRIPE82-0113} and the second for \texttt{HYDRA-0167}. The blue points represents the bright objects and the orange points, the unreliable ones (insiders).}
+  \label{fig:original_mask}
+\end{figure}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsection{Finding the bright stars}
+
+The first task of this project is to find the bright stars. To do that, I have used the existent masks for S-PLUS, that were made exactly with the first commented approach to build the masks: it uses the external star catalog Guide Star Catalog (\href{https://archive.stsci.edu/missions-and-data/dss--gsc}{GSC}) and is a photometric mask around bright stars. The information for the original mask comes in tabular data for $RA$ and $Dec$, indicating if the object is saturated or unreliable (i.e., nearby objects, inside the defined circle for each bright star). The visualization of the two original masks, for the two different tiles could be seen in the Figure \ref{fig:original_mask}.
+
+\begin{table}[h!]
+  \centering
+  \caption{Original mask: area and covered area in pixels}
+  \begin{tabular}{c|c|c}
+    \cline{2-3}
+     & {\cellcolor{orange!20}\bf Area (pixel$^2$)} & {\cellcolor{orange!20}\bf Covered percentage} \\
+    \hline
+    {\cellcolor{blue!20}\texttt{STRIPE82-0113}} & 23.504.215 & 26.9 \%\\
+    \hline
+    {\cellcolor{blue!20}\texttt{HYDRA-0167}} & 18.845.029 & 21.6 \%\\
+    \hline
+  \end{tabular}
+  \label{tb:original_masks}
+\end{table}
+
+I have converted the object positions into an image matrix format. The process followed the steps: first I took the objects positions, converted them it into pixel coordinates and made a 2D grid density; the result of this step was a matrix that I have enlarged up to the size of the image (without the borders); I filled the gaps between the pixel points, to cover the entire area of the circles; finally I have converted the pixels inside the circles with ones and the other with zeros, having the inverted mask, in order to consider the objects inside the mask. The covered area by them is presented in the table \ref{tb:original_masks}. 
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsection{Building the new masks}
+
+The objective of this project is, using the selected region of bright stars and its surroundings of unreliable objects, provide masks that could encapsulate ``just'' the bright stars, i.e., masking only regions as close as possible to them, saving a considerable area of the observations. Moreover, I wanted to select only the bright stars and not all the largest objects. That is the reason because I use the bright stars positions from the previous mask as well.
+
+Here I present two different methods:
+\begin{itemize}
+ \item Only finding the objects;
+ \item Applying image segmentation and, then, finding the objects. 
+\end{itemize}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% 
+\subsubsection{Finding the objects}
+
+\begin{figure}[h!]
+  \centering
+  \includegraphics[scale=0.35]{../results/STRIPE82-0113/finding-distro_objects-band_R.png}
+  \includegraphics[scale=0.35]{../results/STRIPE82-0113/finding-distro_objects-band_G.png}
+  \includegraphics[scale=0.35]{../results/STRIPE82-0113/finding-distro_objects-band_I.png}
+  \includegraphics[scale=0.35]{../results/HYDRA-0167/finding-distro_objects-band_R.png}
+  \includegraphics[scale=0.35]{../results/HYDRA-0167/finding-distro_objects-band_G.png}
+  \includegraphics[scale=0.35]{../results/HYDRA-0167/finding-distro_objects-band_I.png}
+  \caption{Finding the objects: distribution of the found objects for the three different bands ($R$ band in the first column, $G$ band in the second column and $I$ band in the first column) for the two fields \texttt{STRIPE82-0113} (first row) and \texttt{HYDRA-0167} (second row).}
+  \label{fig:distro_finding}
+\end{figure}
+
+The main idea of this method is to apply image processing techniques, from computer vision, for each image channel at time ($R$, $G$ or $B$)\footnote{I have used the Lupton algorithm \cite{Lupton2003} to convert the \texttt{fits} images to $RGB$ images, using $R$ channel as $R$ band, $G$ channel as $G$ band and $B$ channel as $I$ band.}. The first task was to label all the objects in the image.  Any non-zero values in figure are counted as features and zero values are considered the background. For this purpose, it works like a clustering algorithm. Then, I found the labeled objects in rectangles containing each one of them. At this stage, the Figure \ref{fig:distro_finding} shows the distribution of them, for each channel and band, according to their square root of their size.
+
+\begin{figure}[h!]
+  \centering
+  \includegraphics[scale=0.35]{../results/STRIPE82-0113/STRIPE82-0113ZOOM_2-comparison-fmask-all_bands.png}
+  \includegraphics[scale=0.35]{../results/HYDRA-0167/HYDRA-0167ZOOM_2-comparison-fmask-all_bands.png}
+  \caption{Finding the objects: a zoom of two different bright stars for the two different fields \texttt{STRIPE82-0113} (first row) and \texttt{HYDRA-0167} (second row). The first three columns represents the mask for each different band ($R$, $G$ and $I$) and the last one is the union of all the three bands masks.}
+  \label{fig:zoom_mask_finding}
+\end{figure}
+
+
+Then, I have defined a limit for the size of the objects, selecting the small and the larger ones. I removed the small objects, keeping the largest. For the largest I have selected only the ones which corresponded to the bright stars in the original mask. Thus, I have applied a binary closing image technique, in order to fill the small vacancies of the pixels in the mask and to remove the almost the whole vertical bleed trails. The final task was to do the union of all the three different bands mask, to be the final mask for the whole tile. In the Figure \ref{fig:zoom_mask_finding}, I show a zoom around two bright stars, showing the mask for each band and the final union.
+
+\begin{table}[h!]
+  \centering
+  \caption{Finding mask: area and covered area in pixels}
+  \begin{tabular}{c|c|c}
+    \cline{2-3}
+     & {\cellcolor{orange!20}\bf Area (pixel$^2$)} & {\cellcolor{orange!20}\bf Covered percentage} \\
+    \hline
+    {\cellcolor{blue!20}\texttt{STRIPE82-0113}} & 3.383.033 & 3.9 \%\\
+    \hline
+    {\cellcolor{blue!20}\texttt{HYDRA-0167}} & 3.147.190 & 3.6 \%\\
+    \hline
+  \end{tabular}
+  \label{tb:finding_masks}
+\end{table}
+
+The covered area by the mask is presented in the table \ref{tb:finding_masks}. This represents an improvement of $6.9 \times$ for \texttt{STRIPE82-0113} and $6.0 \times$ for \texttt{HYDRA-0167}. And, the visual representation for the whole field could be seen in the Figure \ref{fig:complete_mask_finding}. Notice that all the bright stars where caught in both masks.
+
+\begin{figure}[h!]
+  \centering
+  \includegraphics[scale=0.25]{../results/STRIPE82-0113/STRIPE82-0113-finding-comparison.png}
+  \includegraphics[scale=0.25]{../results/HYDRA-0167/HYDRA-0167-finding-comparison.png}
+  \caption{Finding the objects: a complete comparison of the original images, their masks (with the saturated stars in evidence) and the masked image. The two different fields \texttt{STRIPE82-0113} (first row) and \texttt{HYDRA-0167} (second row) are presented.}
+  \label{fig:complete_mask_finding}
+\end{figure}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% 
+\subsubsection{Image segmentation and finding the objects}
+
+The general idea from this second method was to use image segmentation techniques to improve the object finding. Image segmentation is the process of partitioning an image into multiple distinct regions, where each pixel has similar attributes.
+
+\begin{figure}[h!]
+  \centering
+  \includegraphics[scale=0.35]{../results/STRIPE82-0113/STRIPE82-0113-elbow_method-R.png}
+  \includegraphics[scale=0.35]{../results/STRIPE82-0113/STRIPE82-0113-elbow_method-G.png}
+  \includegraphics[scale=0.35]{../results/STRIPE82-0113/STRIPE82-0113-elbow_method-G.png}
+  \includegraphics[scale=0.35]{../results/HYDRA-0167/HYDRA-0167-elbow_method-R.png}
+  \includegraphics[scale=0.35]{../results/HYDRA-0167/HYDRA-0167-elbow_method-G.png}
+  \includegraphics[scale=0.35]{../results/HYDRA-0167/HYDRA-0167-elbow_method-I.png}
+  \caption{Elbow method: results for the three different bands ($R$ band in the first column, $G$ band in the second column and $I$ band in the third column) for the two fields \texttt{STRIPE82-0113} (first row) and \texttt{HYDRA-0167} (second row). The elbow happens, in all the cases, for $K = 3$, but, to ensure the results, I went a little further, choosing $K = 5$.}
+  \label{fig:elbow_method}
+\end{figure}
+
+The technique used here detect similarities in the regions of an image using the K-Means clustering algorithm. Here, the K-Means is used to find certain groups based on the color similarity of the image, with the number of groups represented by K. In this work, the best number of cluster was found using the elbow method. This method has the same general idea from the statistical tools like BIC or AIC, to find the best parameter as well. More specifically it measures how much the increase of $K$ in the K-Means vary according to the intra-cluster. This quantity to be minimized is called as within-cluster sum of square (WCSS) too. I have computed the best $K$ for just one small piece of the fields, because it is made for the original \href{https://scikit-learn.org/stable/modules/generated/sklearn.cluster.KMeans.html}{\texttt{sklearn KMeans}}, which is not made to work with images, but tabular data. The results are in the Figure \ref{fig:elbow_method}. As explained in the caption, the elbow happens, in all the cases, for $K = 3$, but, to ensure the results, I choose $K = 5$.
+
+\begin{figure}[h!]
+  \centering
+  \includegraphics[scale=0.42]{../results/STRIPE82-0113/STRIPE82-0113-result_segmentation-R.png}
+  \includegraphics[scale=0.35]{../results/HYDRA-0167/HYDRA-0167-result_segmentation-R.png}
+  \includegraphics[scale=0.42]{../results/STRIPE82-0113/STRIPE82-0113-result_segmentation-G.png}
+  \includegraphics[scale=0.35]{../results/HYDRA-0167/HYDRA-0167-result_segmentation-G.png}
+  \includegraphics[scale=0.42]{../results/STRIPE82-0113/STRIPE82-0113-result_segmentation-I.png}
+  \includegraphics[scale=0.35]{../results/HYDRA-0167/HYDRA-0167-result_segmentation-I.png}
+  \caption{Comparison for a zoom in the the original image and the segmented images (using $K = 5$) for the three different bands ($R$ band as first row, $G$ band as second row and $I$ band as third row) for the two fields \texttt{STRIPE82-0113} (first and second columns) and \texttt{HYDRA-0167} (third and fourth columns).}
+  \label{fig:comparison_segmentation}
+\end{figure}
+
+After choosing the best $K$ value, I have applied the image segmentation, using \texttt{kmeans}, with the specific library to work the images, from \href{https://docs.opencv.org/4.5.2/d1/d5c/tutorial_py_kmeans_opencv.html}{\texttt{cv2}}. The visual results are found in the Figure \ref{fig:comparison_segmentation}. The segmentation evidences the brightest and the darkest regions of the images and this improves the object identification from the finding objects method.
+
+\begin{figure}[h!]
+  \centering
+  \includegraphics[scale=0.35]{../results/STRIPE82-0113/segmenting-distro_objects-band_R.png}
+  \includegraphics[scale=0.35]{../results/STRIPE82-0113/segmenting-distro_objects-band_G.png}
+  \includegraphics[scale=0.35]{../results/STRIPE82-0113/segmenting-distro_objects-band_I.png}
+  \includegraphics[scale=0.35]{../results/HYDRA-0167/segmenting-distro_objects-band_R.png}
+  \includegraphics[scale=0.35]{../results/HYDRA-0167/segmenting-distro_objects-band_G.png}
+  \includegraphics[scale=0.35]{../results/HYDRA-0167/segmenting-distro_objects-band_I.png}
+  \caption{Segmenting the objects: distribution of the found objects for the three different bands ($R$ band in the first column, $G$ band in the second column and $I$ band in the third column) for the two fields \texttt{STRIPE82-0113} (first row) and \texttt{HYDRA-0167} (second row).}
+  \label{fig:distro_segmenting}
+\end{figure}
+
+The rest of the work done here followed the same steps from the previous method, but now finds the objects in the segmented images. Then, the size of the rectangular objects are found in the Figure \ref{fig:distro_segmenting}. Comparing those results with the previous ones (see Figure \ref{fig:distro_finding}) we can barely see a big difference, but it is evidenced in the next results.
+
+\begin{figure}[h!]
+  \centering
+  \includegraphics[scale=0.35]{../results/STRIPE82-0113/STRIPE82-0113ZOOM_2-comparison-smask-all_bands.png}
+  \includegraphics[scale=0.35]{../results/HYDRA-0167/HYDRA-0167ZOOM_2-comparison-smask-all_bands.png}
+  \caption{Segmenting the objects: a zoom of two bright stars for the two different fields \texttt{STRIPE82-0113} (first row) and \texttt{HYDRA-0167} (second row). The first three columns represents the mask for each different band ($R$, $G$ and $I$) and the last one is the union of all the three bands masks.}
+  \label{fig:zoom_mask_segmenting}
+\end{figure}
+
+After defining a new limit value for the size of the objects, to select the small and largest ones for this new method and performing exact the same steps described in the previous sub-subsection, I obtained the mask for each band and field. At the end I have obtained the final mask as the union of all the band masks, for each field as well. And, in the Figure \ref{fig:zoom_mask_segmenting}, I show the zoom (for the same bright stars showed previously), showing the mask for each band and the final one.
+
+\begin{table}[h!]
+  \centering
+  \caption{Segmenting mask: area and covered area in pixels}
+  \begin{tabular}{c|c|c}
+    \cline{2-3}
+     & {\cellcolor{orange!20} \bf Area (pixel$^2$)} & {\cellcolor{orange!20} \bf Covered percentage} \\
+    \hline
+    {\cellcolor{blue!20}\texttt{STRIPE82-0113}} & 2.269.400 & 2.6 \%\\
+    \hline
+    {\cellcolor{blue!20}\texttt{HYDRA-0167}} & 2.427.164 & 2.8 \%\\
+    \hline
+  \end{tabular}
+  \label{tb:segmenting_masks}
+\end{table}
+
+The final result comes with the covered area by the mask, that is presented in the table \ref{tb:segmenting_masks}. This represents an improvement of $10.3 \times$ for \texttt{STRIPE82-0113} and $7.7 \times$  for \texttt{HYDRA-0167}. In other words, the image segmentation improves a lot the gain in area for both fields. And, the visual representation for the whole field could be seen in the Figure \ref{fig:complete_mask_segmenting}. One more time, you can see that all the bright stars where caught in both masks, covering a small area, compared to the previous method.
+
+\begin{figure}[h!]
+  \centering
+  \includegraphics[scale=0.25]{../results/STRIPE82-0113/STRIPE82-0113-segmenting-comparison.png}
+  \includegraphics[scale=0.25]{../results/HYDRA-0167/HYDRA-0167-segmenting-comparison.png}
+  \caption{Segmenting the objects: a complete comparison of the original fields, their masks (with the saturated stars in evidence) and the masked image. The two different fields \texttt{STRIPE82-0113} (first row) and \texttt{HYDRA-0167} (second row) are presented.}
+  \label{fig:complete_mask_segmenting}
+\end{figure}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% 
+\section{Results analysis and discussions}
+\label{sec:res_and_disc}
+
+\begin{figure}[h!]
+  \centering
+  \includegraphics[scale=0.25]{../results/STRIPE82-0113/STRIPE82-0113-finding-comparison-ZOOM_2.png}
+  \includegraphics[scale=0.25]{../results/STRIPE82-0113/STRIPE82-0113-segmenting-comparison-ZOOM_2.png}
+  \includegraphics[scale=0.25]{../results/HYDRA-0167/HYDRA-0167-finding-comparison-ZOOM_2.png}
+  \includegraphics[scale=0.25]{../results/HYDRA-0167/HYDRA-0167-segmenting-comparison-ZOOM_2.png}
+  \caption{Final mask comparison (ZOOM 1): the original $RGB$ image, the masked image (using the two methods: finding and segmenting) and the masked resulted image. The two different fields \texttt{STRIPE82-0113} (first two rows) and \texttt{HYDRA-0167} (last two rows) are presented.}
+  \label{fig:final_mask_comparison-Z1}
+\end{figure}
+
+\begin{figure}[h!]
+  \centering
+  \includegraphics[scale=0.25]{../results/STRIPE82-0113/STRIPE82-0113-finding-comparison-ZOOM_1.png}
+  \includegraphics[scale=0.25]{../results/STRIPE82-0113/STRIPE82-0113-segmenting-comparison-ZOOM_1.png}
+  \includegraphics[scale=0.25]{../results/HYDRA-0167/HYDRA-0167-finding-comparison-ZOOM_1.png}
+  \includegraphics[scale=0.25]{../results/HYDRA-0167/HYDRA-0167-segmenting-comparison-ZOOM_1.png}
+  \caption{Final mask comparison (ZOOM 2): the original $RGB$ image, the masked image (using the two methods: finding and segmenting) and the masked resulted image. The two different fields \texttt{STRIPE82-0113} (first two rows) and \texttt{HYDRA-0167} (last two rows) are presented.}
+  \label{fig:final_mask_comparison-Z2}
+\end{figure}
+
+The main results, beyond the ones presented in the previous section are the image comparison with the original $RGB$ image, the masked image (using the two methods) and the masked resulted image. Those results are in the Figures \ref{fig:final_mask_comparison-Z1}-\ref{fig:final_mask_comparison-Z2}. Looking at those figures, you can clearly see that the segmenting method improves the masked area, decreasing and defining more the spikes and getting a low number of small objects to consider.
+
+The last and final results were obtained running \texttt{SExtractor} in the original and masked images. A compilation of the number of detected objects and covered percentage (in amount of objects), by the mask, can be found in the Table \ref{tb:SExtractor_results}. Notice that the number of percentage of the measured objects is quite different (is higher), compared with the covered area percentage, but all the times the segmented image is better than the finding ones. If you take a look at the magnitudes of the measured objects (see Figure \ref{fig:final_magnitude_comparison}) you can see that they are quite similar, when compared to the original image in all cases. 
+
+\begin{table}[h!]
+  \centering
+  \caption{SExtractor results: number of detected objects and covered percentage number in quantity}
+  \begin{tabular}{c|c|c|c|c}
+    \cline{1-5}
+    \multirow{2}{*}{\bf Field} & \multirow{2}{*}{\bf Band} & \multirow{2}{*}{\bf Image} &{\bf Number of} & {\bf Covered percentage} \\
+    & & & {\bf detected objects} & {\bf by the mask} \\
+    \hline
+    \cellcolor{gray!20} & \cellcolor{red!20} & Unmasked & 38.601 & --- \\
+    \cline{3-5}
+    \cellcolor{gray!20} & \cellcolor{red!20} & Original mask & 22.254 & 42.4 \%\\
+    \cline{3-5}
+    \cellcolor{gray!20} & \cellcolor{red!20} & Finding mask & 34.153 & 11.5 \%\\
+    \cline{3-5}
+    \cellcolor{gray!20} & \multirow{-4}{*}{\cellcolor{red!20}R} & Segmenting Masked & 35.100 & 9.1 \%\\
+    \cline{2-5}
+    \cellcolor{gray!20} & \cellcolor{green!20} & Unmasked & 25.758 & --- \\
+    \cline{3-5}
+    \cellcolor{gray!20} & \cellcolor{green!20} & Original mask & 14.752 & 42.7 \%\\
+    \cline{3-5}
+    \cellcolor{gray!20} & \cellcolor{green!20} & Finding mask & 22.870 & 11.2 \%\\
+    \cline{3-5}
+    \cellcolor{gray!20} & \multirow{-4}{*}{\cellcolor{green!20}G} & Segmenting mask & 23.471 & 8.9 \%\\
+    \cline{2-5}
+    \cellcolor{gray!20} & \cellcolor{blue!20} & Unmasked & 48.453 & --- \\
+    \cline{3-5}
+    \cellcolor{gray!20} & \cellcolor{blue!20} & Original mask & 28.063 & 42.1 \%\\
+    \cline{3-5}
+    \cellcolor{gray!20} & \cellcolor{blue!20} & Finding mask & 42.928 & 11.4 \%\\
+    \cline{3-5}
+    \multirow{-9}{*}{\cellcolor{gray!20} \texttt{STRIPE82-0113}} & \multirow{-4}{*}{\cellcolor{blue!20}I} & Segmenting mask & 44.151 & 8.9 \%\\
+    \hline
+    \cellcolor{gray!20} & \cellcolor{red!20} & Unmasked & 119.214 & --- \\
+    \cline{3-5}
+    \cellcolor{gray!20} & \cellcolor{red!20} & Original mask & 79.288 & 33.5 \%\\
+    \cline{3-5}
+    \cellcolor{gray!20} & \cellcolor{red!20} & Finding mask & 107.818 & 9.6 \%\\
+    \cline{3-5}
+    \cellcolor{gray!20} & \multirow{-4}{*}{\cellcolor{red!20}R} & Segmenting mask & 110.087 & 7.7 \%\\
+    \cline{2-5}
+    \cellcolor{gray!20} & \cellcolor{green!20} & Unmasked & 83.805 & --- \\
+    \cline{3-5}
+    \cellcolor{gray!20} & \cellcolor{green!20} & Original mask & 56.196 & 32.9 \%\\
+    \cline{3-5}
+    \cellcolor{gray!20} & \cellcolor{green!20} & Finding mask & 75.870 & 9.5 \%\\
+    \cline{3-5}
+    \cellcolor{gray!20} & \multirow{-4}{*}{\cellcolor{green!20}G} & Segmenting mask & 77325 & 7.7 \%\\
+    \cline{2-5}
+    \cellcolor{gray!20} & \cellcolor{blue!20} & Unmasked & 144.522 & --- \\
+    \cline{3-5}
+    \cellcolor{gray!20} & \cellcolor{blue!20} & Original mask & 95.590 & 33.7 \%\\
+    \cline{3-5}
+    \cellcolor{gray!20} & \cellcolor{blue!20} & Finding mask & 130.575 & 9.7 \%\\
+    \cline{3-5}
+    \multirow{-9}{*}{\cellcolor{gray!20}\texttt{HYDRA-0167}} & \multirow{-4}{*}{\cellcolor{blue!20}I} & Segmenting mask & 133.299 & 7.8 \%\\
+    \hline
+  \end{tabular}
+  \label{tb:SExtractor_results}
+\end{table}
+
+\begin{figure}[h!]
+  \centering
+  \includegraphics[scale=0.26]{../results/STRIPE82-0113/STRIPE82-0113-magnitudes-band_R.png}
+  \includegraphics[scale=0.26]{../results/STRIPE82-0113/STRIPE82-0113-magnitudes-band_G.png}
+  \includegraphics[scale=0.26]{../results/STRIPE82-0113/STRIPE82-0113-magnitudes-band_I.png}
+  \includegraphics[scale=0.26]{../results/HYDRA-0167/HYDRA-0167-magnitudes-band_R.png}
+  \includegraphics[scale=0.26]{../results/HYDRA-0167/HYDRA-0167-magnitudes-band_G.png}
+  \includegraphics[scale=0.26]{../results/HYDRA-0167/HYDRA-0167-magnitudes-band_I.png}
+  \caption{Final magnitudes comparison: comparison of the number of objects measured by SExtractor of the original images and the masked images (finding and segmenting). I present the results for the bands $R$, $G$ and $I$ and the magnitudes aper, auto and petro.}
+  \label{fig:final_magnitude_comparison}
+\end{figure}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Conclusions}
+\label{sec:conclusions}
+
+I was able to provide masks of zeros and ones that cover less than 5 \% of the observed area and less than 15 \% of the measured objects. There is a mask for each band, but the final mask is an union of all of the three band masks for the two different methods. Besides, the mask covers almost all the main image effects, like the point-spread function shaped luminous patterns, extended luminous halos and ghosts, the linear bleed trails and the spikes. Finally, the two methods presented here could be easily extended to all the fields of S-PLUS.
+
+\begin{thebibliography}{1}
+  
+	\bibitem{DES2005}
+	The Dark Energy Survey Collaboration.
+	\newblock The Dark Energy Survey.
+	\newblock In {\em arXiv: astro-ph/0510346}, 2005.
+
+        \bibitem{LSST2008}
+	Ivezic, Z., Tyson, J. A., Acosta, E., et al.
+	\newblock LSST: from Science Drivers to Reference Design and Anticipated Data Products.
+	\newblock In {\em arXiv:0805.2366}, 2008.
+
+        \bibitem{Euclid2012}
+	Amendola, L., Appleby, S., Bacon, D., et al.
+	\newblock Cosmology and fundamental physics with the Euclid satellite.
+	\newblock In {\em arXiv:1206.1225}, 2012.
+
+        \bibitem{PFS2012}
+	Ellis, R., Takada, M., Aihara, H., et al.
+	\newblock Extragalactic Science, Cosmology and Galactic Archaeology with the Subaru Prime Focus Spectrograph (PFS).
+	\newblock In {\em arXiv:1206.0737}, 2012.
+
+        \bibitem{JPAS2014}
+	Benitez, N., et al.
+	\newblock J-PAS: The Javalambre-Physics of the Accelerated Universe Astrophysical Survey.
+	\newblock In {\em arXiv: 1403.5237}, 2014.
+
+        \bibitem{DESI2016}
+	The DESI Collaboration.
+	\newblock The DESI Experiment Part I: Science,Targeting, and Survey Design.
+	\newblock In {\em arXiv:1611.00036}, 2016.
+
+        \bibitem{SPLUS2019}
+	Mendes de Oliveira, C. and Ribeiro, T. and Schoenell, W. and Kanaan, A. and Overzier, R. A. and Molino, A. and Sampedro, L. and Coelho, P. and Barbosa, C. E. and Cortesi, A. and et al.
+	\newblock The Southern Photometric Local Universe Survey (S-PLUS): improved SEDs, morphologies, and redshifts with 12 optical filters.
+	\newblock In {\em arXiv:1907.01567}, 2019.
+
+        \bibitem{Coupon2017}
+	Coupon, Jean and Czakon, Nicole and Bosch, James and Komiyama, Yutaka and Medezinski, Elinor and Miyazaki, Satoshi and Oguri, Masamune.
+	\newblock The bright-star masks for the HSC-SSP survey.
+	\newblock In {\em arXiv:1705.00622}, 2017.
+
+        \bibitem{Coupon2009}
+	Coupon, J. and Ilbert, O. and Kilbinger, M. and McCracken, H. J. and Mellier, Y. and Arnouts, S. and Bertin, E. and Hudelot, P. and Schultheis, M. and Le Fèvre, O. and et al.
+	\newblock Photometric redshifts for the CFHTLS T0004 deep and wide fields.
+	\newblock In {\em arXiv:0811.3326}, 2008.
+
+        \bibitem{Heymans2012}
+	Heymans, Catherine and Van Waerbeke, Ludovic and Miller, Lance and Erben, Thomas and Hildebrandt, Hendrik and Hoekstra, Henk and Kitching, Thomas D. and Mellier, Yannick and Simon, Patrick and Bonnett, Christopher and et al.
+	\newblock CFHTLenS: the Canada–France–Hawaii Telescope Lensing Survey.
+	\newblock In {\em arXiv:1210.0032}, 2012.
+
+        \bibitem{Lupton2003}
+	Lupton, Robert and Blanton, Michael R. and Fekete, George and Hogg, David W. and O’Mullane, Wil and Szalay, Alex and Wherry, Nicholas.
+	\newblock Preparing Red‐Green‐Blue Images from CCD Data.
+	\newblock In {\em arXiv:0312483}, 2003.
+
+\end{thebibliography}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+
+\end{document}
+
+%%% Local Variables:
+%%% mode: latex
+%%% TeX-master: t
+%%% End:
