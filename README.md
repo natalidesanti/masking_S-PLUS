@@ -2,7 +2,7 @@
 
 This repo contains a code and a document explaining how to mask some tiles from the Southern Photometric Local Universe Survey ([S-PLUS](https://www.splus.iag.usp.br/)). It was made as a _term project_ for the discipline [Astronomical databases and astrostatistics in the era of big data](https://uspdigital.usp.br/janus/componente/disciplinasOferecidasInicial.jsf?action=3&sgldis=AGA5926).
 
-This work was made with the extremelly helpful contributions from [Maria Luísa Gomes Buzzo](http://lattes.cnpq.br/9829508296992486), [Felipe de Almeida Fernandes](http://lattes.cnpq.br/3565984584227844), [Lilianne Nakazono](http://lattes.cnpq.br/8135231533828484), [Erik Vinicius Rodrigues de Lima](http://lattes.cnpq.br/6523110145757023) and Professors [Claudia Lucia Mendes de Oliveira](http://lattes.cnpq.br/1170240266075175), [Zeljko Ivezic](http://faculty.washington.edu/ivezic/) and [Luis Raul Weber Abramo](http://lattes.cnpq.br/4558796258762790).
+This work was made with the extremely helpful contributions from [Maria Luísa Gomes Buzzo](http://lattes.cnpq.br/9829508296992486), [Felipe de Almeida Fernandes](http://lattes.cnpq.br/3565984584227844), [Lilianne Nakazono](http://lattes.cnpq.br/8135231533828484), [Erik Vinicius Rodrigues de Lima](http://lattes.cnpq.br/6523110145757023) and Professors [Claudia Lucia Mendes de Oliveira](http://lattes.cnpq.br/1170240266075175), [Zeljko Ivezic](http://faculty.washington.edu/ivezic/) and [Luis Raul Weber Abramo](http://lattes.cnpq.br/4558796258762790).
 
 ## Code description
 
