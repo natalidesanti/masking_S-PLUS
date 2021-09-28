@@ -58,7 +58,7 @@ pdfkeywords={survey mask, computer vision, image segmentation, k-means},
 
 The large scale structure of the universe could be measured studying the galaxy distribution in the recent observations \cite{DES2005, LSST2008, Euclid2012, PFS2012, DESI2016, SPLUS2019}. To do this we need multi-wavelength imaging data to measure the galaxy photometric redshifts, requiring high-precision data pre-processing, whose development and validation are driven by the increasing statistical power of the surveys and the increasing relative importance of the various systematic effects \cite{Coupon2017}.
 
-One of the systematic effects accounts for the bright stars, that saturate the CCD images, messing up measurements of nearby objects and losing the information beyond the saturation limit. The first approach to circumvent this problem usually is the use of external star catalogs to build photometric masks around the saturated stars. However, the loss in area using this method ranges between 10\% and 20\% \cite{Coupon2009, Heymans2012}. Another important thing to mention is that those masks need to cover those stars without masking any extended source of interest \cite{Coupon2017}.
+One of the systematic effects accounts for the bright stars, that saturate the CCD images, messing up measurements of nearby objects and losing the information beyond the saturation limit. The first approach to circumvent this problem usually is the use of external star catalogs to build photometric masks around the saturated stars. However, the loss in area using this method ranges between 10\% and 20\% \cite{Coupon2009, Heymans2012}. The original mask for S-PLUS uses an external star catalog (more specifically, the Guide Star Catalog - GSC) and comprehends a photometric mask around bright stars, covering $\sim$ 20\% of the total area. Another important thing to mention is that those masks need to cover those stars without masking any extended source of interest \cite{Coupon2017}.
 
 Considering all those challenges, in this work I provide a code that is able to mask almost only the saturated stars (not completely only them because I consider extremely nearby objects of the parts of those stars), that covers less than 5\% of the observed area. In this way, this work is organized as follow: first I show a little about the structure of the bright stars in the section \ref{sec:more}; in the section \ref{sec:Methodology} I explain what was done, showing some results; the analysis of the results and discussions are presented in the section \ref{sec:res_and_disc}; and I close the manuscript with the conclusions, in the section \ref{sec:conclusions}.
 
@@ -159,7 +159,7 @@ Then, I have defined a limit for the size of the objects, selecting the small an
     \cline{2-3}
      & {\cellcolor{orange!20}\bf Area (pixel$^2$)} & {\cellcolor{orange!20}\bf Covered percentage} \\
     \hline
-    {\cellcolor{blue!20}\texttt{STRIPE82-0113}} & 3.383.033 & 3.9 \%\\
+    {\cellcolor{blue!20}\texttt{STRIPE82-0113}} & 3.383.033 & 4.3 \%\\
     \hline
     {\cellcolor{blue!20}\texttt{HYDRA-0167}} & 3.147.190 & 3.6 \%\\
     \hline
@@ -241,7 +241,7 @@ After defining a new limit value for the size of the objects, to select the smal
     \cline{2-3}
      & {\cellcolor{orange!20} \bf Area (pixel$^2$)} & {\cellcolor{orange!20} \bf Covered percentage} \\
     \hline
-    {\cellcolor{blue!20}\texttt{STRIPE82-0113}} & 2.269.400 & 2.6 \%\\
+    {\cellcolor{blue!20}\texttt{STRIPE82-0113}} & 2.269.400 & 2.9 \%\\
     \hline
     {\cellcolor{blue!20}\texttt{HYDRA-0167}} & 2.427.164 & 2.8 \%\\
     \hline
@@ -295,29 +295,29 @@ The last and final results were obtained running \texttt{SExtractor} in the orig
     \multirow{2}{*}{\bf Field} & \multirow{2}{*}{\bf Band} & \multirow{2}{*}{\bf Image} &{\bf Number of} & {\bf Covered percentage} \\
     & & & {\bf detected objects} & {\bf by the mask} \\
     \hline
-    \cellcolor{gray!20} & \cellcolor{red!20} & Unmasked & 38.601 & --- \\
+    \cellcolor{gray!20} & \cellcolor{red!20} & Unmasked & 38 601 & --- \\
     \cline{3-5}
-    \cellcolor{gray!20} & \cellcolor{red!20} & Original mask & 22.254 & 42.4 \%\\
+    \cellcolor{gray!20} & \cellcolor{red!20} & Original mask & 27 549 & 28.6 \%\\
     \cline{3-5}
-    \cellcolor{gray!20} & \cellcolor{red!20} & Finding mask & 34.153 & 11.5 \%\\
+    \cellcolor{gray!20} & \cellcolor{red!20} & Finding mask & 35 602 & 7.8 \%\\
     \cline{3-5}
-    \cellcolor{gray!20} & \multirow{-4}{*}{\cellcolor{red!20}R} & Segmenting Masked & 35.100 & 9.1 \%\\
+    \cellcolor{gray!20} & \multirow{-4}{*}{\cellcolor{red!20}R} & Segmenting Masked & 36 267 & 6.1 \%\\
     \cline{2-5}
-    \cellcolor{gray!20} & \cellcolor{green!20} & Unmasked & 25.758 & --- \\
+    \cellcolor{gray!20} & \cellcolor{green!20} & Unmasked & 25 758 & --- \\
     \cline{3-5}
-    \cellcolor{gray!20} & \cellcolor{green!20} & Original mask & 14.752 & 42.7 \%\\
+    \cellcolor{gray!20} & \cellcolor{green!20} & Original mask & 18 270 & 29.1 \%\\
     \cline{3-5}
-    \cellcolor{gray!20} & \cellcolor{green!20} & Finding mask & 22.870 & 11.2 \%\\
+    \cellcolor{gray!20} & \cellcolor{green!20} & Finding mask & 23 430 & 9.0 \%\\
     \cline{3-5}
-    \cellcolor{gray!20} & \multirow{-4}{*}{\cellcolor{green!20}G} & Segmenting mask & 23.471 & 8.9 \%\\
+    \cellcolor{gray!20} & \multirow{-4}{*}{\cellcolor{green!20}G} & Segmenting mask & 23 906 & 7.2 \%\\
     \cline{2-5}
-    \cellcolor{gray!20} & \cellcolor{blue!20} & Unmasked & 48.453 & --- \\
+    \cellcolor{gray!20} & \cellcolor{blue!20} & Unmasked & 48 453 & --- \\
     \cline{3-5}
-    \cellcolor{gray!20} & \cellcolor{blue!20} & Original mask & 28.063 & 42.1 \%\\
+    \cellcolor{gray!20} & \cellcolor{blue!20} & Original mask & 45 141 & 28.1 \%\\
     \cline{3-5}
-    \cellcolor{gray!20} & \cellcolor{blue!20} & Finding mask & 42.928 & 11.4 \%\\
+    \cellcolor{gray!20} & \cellcolor{blue!20} & Finding mask & 45 937 & 6.8 \%\\
     \cline{3-5}
-    \multirow{-9}{*}{\cellcolor{gray!20} \texttt{STRIPE82-0113}} & \multirow{-4}{*}{\cellcolor{blue!20}I} & Segmenting mask & 44.151 & 8.9 \%\\
+    \multirow{-9}{*}{\cellcolor{gray!20} \texttt{STRIPE82-0113}} & \multirow{-4}{*}{\cellcolor{blue!20}I} & Segmenting mask & 44.151 & 5.2 \%\\
     \hline
     \cellcolor{gray!20} & \cellcolor{red!20} & Unmasked & 119.214 & --- \\
     \cline{3-5}
